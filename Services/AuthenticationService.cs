@@ -37,7 +37,7 @@ namespace _3abarni_backend.Services
                 throw new ArgumentException($"Unable to register user {request.Username} errors: {GetErrorsText(result.Errors)}");
             }
 
-            return await Login(new LoginRequestDto { Username = request.Email, Password = request.Password });
+            return await Login(new LoginRequestDto { Email = request.Email, Password = request.Password });
 
         }
         public async Task<string> Login(LoginRequestDto request)
