@@ -45,7 +45,7 @@ namespace _3abarni_backend.Services
                 throw new ArgumentException($"Unable to register user {request.Username} errors: {GetErrorsText(result.Errors)}");
             }
             if( request.ProfilePic is not null ) {
-                    user.ProfilePic = await _fileUploadService.UploadFile(request.ProfilePic);
+                    user.ProfilePic = await _fileUploadService.UploadFile(_configuration.GetSection("FileUpload:ProfilePictures").Value,request.ProfilePic);
                 }
             else
             {
