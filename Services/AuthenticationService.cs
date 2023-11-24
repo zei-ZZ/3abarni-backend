@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Transactions;
 
 namespace _3abarni_backend.Services
 {
@@ -12,14 +13,20 @@ namespace _3abarni_backend.Services
     {
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
-        public AuthenticationService (UserManager<User> userManager, IConfiguration configuration)
+        private readonly FileUploadService _fileUploadService;
+        public AuthenticationService (UserManager<User> userManager, IConfiguration configuration, FileUploadService fileUploadService)
         {
             _userManager = userManager;
             _configuration = configuration;
+            _fileUploadService = fileUploadService;
         }
 
         public async Task <string> Register(RegisterRequestDto request)
         {
+            using var transaction = new TransactionScope();
+            try
+            {
+
             var userByEmail= await _userManager.FindByNameAsync(request.Email);
             if(userByEmail is not null) {
                 throw new ArgumentException($"User with email {request.Email} exists.");
@@ -28,6 +35,7 @@ namespace _3abarni_backend.Services
             User user = new() {
                 Email = request.Email,
                 UserName = request.Username,
+
                 SecurityStamp = Guid.NewGuid().ToString()
             };
             var result = await _userManager.CreateAsync(user, request.Password);
@@ -36,8 +44,21 @@ namespace _3abarni_backend.Services
             {
                 throw new ArgumentException($"Unable to register user {request.Username} errors: {GetErrorsText(result.Errors)}");
             }
-
-            return await Login(new LoginRequestDto { Email = request.Email, Password = request.Password });
+            if( request.ProfilePic is not null ) {
+                    user.ProfilePic = await _fileUploadService.UploadFile(request.ProfilePic);
+                }
+            else
+            {
+                    user.ProfilePic = Path.Combine(_configuration.GetSection("FileUpload:ProfilePictures").Value, "default.jpg");
+            }
+                await _userManager.UpdateAsync(user);
+                transaction.Complete();
+                return await Login(new LoginRequestDto { Email = request.Email, Password = request.Password });
+            }
+            catch (Exception ex) {
+                transaction.Dispose();  // Rollback the transaction
+                throw new Exception("Registration failed", ex);
+            }
 
         }
         public async Task<string> Login(LoginRequestDto request)
