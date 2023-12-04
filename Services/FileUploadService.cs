@@ -8,6 +8,9 @@
 
         public async Task<string> UploadFile(string uploadDir,IFormFile file)
         {
+            try
+            {
+
             if (file == null || file.Length==0) {
                 throw new ArgumentException("File is nul or empty");
             }
@@ -21,6 +24,11 @@
 
             }
             return fileName;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("error" + ex.Message);
+            }
         }
     }
 }
