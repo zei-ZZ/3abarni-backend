@@ -24,42 +24,47 @@ namespace _3abarni_backend.Services
 
         public async Task <string> Register([FromForm] RegisterRequestDto request)
         {
-           // using var transaction = new TransactionScope();
-            /*try
-            { */
-
-            var userByEmail= await _userManager.FindByNameAsync(request.Email);
-            if(userByEmail is not null) {
-                throw new ArgumentException($"User with email {request.Email} exists.");
-            }
-
-            User user = new() {
-                Email = request.Email,
-                UserName = request.Username,
-
-                SecurityStamp = Guid.NewGuid().ToString()
-            };
-            var result = await _userManager.CreateAsync(user, request.Password);
-
-            if (!result.Succeeded)
+            // using var transaction = new TransactionScope();
+            try
             {
-                throw new ArgumentException($"Unable to register user {request.Username} errors: {GetErrorsText(result.Errors)}");
-            }
-            if( request.ProfilePic is not null ) {
-                    user.ProfilePicPath = await _fileUploadService.UploadFile(_configuration.GetSection("FileUpload:ProfilePictures").Value,request.ProfilePic);
+                using (var tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    var userByEmail = await _userManager.FindByEmailAsync(request.Email);
+                    if (userByEmail is not null)
+                    {
+                        throw new ArgumentException($"User with email {request.Email} exists.");
+                    }
+
+                    User user = new()
+                    {
+                        Email = request.Email,
+                        UserName = request.Username,
+
+                        SecurityStamp = Guid.NewGuid().ToString()
+                    };
+                    var result = await _userManager.CreateAsync(user, request.Password);
+
+                    if (!result.Succeeded)
+                    {
+                        throw new ArgumentException($"Unable to register user {request.Username} errors: {GetErrorsText(result.Errors)}");
+                    }
+                    if (request.ProfilePic is not null)
+                    {
+                        user.ProfilePicPath = await _fileUploadService.UploadFile(_configuration.GetSection("FileUpload:ProfilePictures").Value, request.ProfilePic);
+                    }
+                    else
+                    {
+                        user.ProfilePicPath = Path.Combine(_configuration.GetSection("FileUpload:ProfilePictures").Value, "default.jpg");
+                    }
+                    await _userManager.UpdateAsync(user);
+                    tx.Complete();
+                    return await Login(new LoginRequestDto { Email = request.Email, Password = request.Password });
                 }
-            else
-            {
-                    user.ProfilePicPath = Path.Combine(_configuration.GetSection("FileUpload:ProfilePictures").Value, "default.jpg");
             }
-                await _userManager.UpdateAsync(user);
-                //transaction.Complete();
-                return await Login(new LoginRequestDto { Email = request.Email, Password = request.Password });
-            /*}
-            catch (Exception ex) {
-                transaction.Dispose();  // Rollback the transaction
+            catch (Exception ex)
+            {
                 throw new Exception("Registration failed", ex);
-            }*/
+            }
 
         }
         public async Task<string> Login(LoginRequestDto request)

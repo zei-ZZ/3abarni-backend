@@ -14,7 +14,7 @@ var configuration = builder.Configuration;
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("db")));
 
 //Identity
-builder.Services.AddIdentity<User, IdentityRole>()
+builder.Services.AddIdentity<User, IdentityRole>(options=> { options.User.RequireUniqueEmail = true; })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
