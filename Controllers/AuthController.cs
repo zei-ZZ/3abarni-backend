@@ -2,6 +2,7 @@
 using _3abarni_backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace _3abarni_backend.Controllers
 {
@@ -18,16 +19,16 @@ namespace _3abarni_backend.Controllers
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody]LoginRequestDto request)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
         {
             var response = await _authenticationService.Login(request);
 
             return Ok(response);
-
         }
+
         [AllowAnonymous]
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
+        public async Task<IActionResult> Register([FromForm] RegisterRequestDto request)
         {
             var response = await _authenticationService.Register(request);
 
