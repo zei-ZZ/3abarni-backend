@@ -2,10 +2,11 @@ using _3abarni_backend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens; 
 using System.Text;
 using Microsoft.OpenApi.Models;
 using _3abarni_backend.Services;
+using _3abarni_backend.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -43,6 +44,7 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -84,7 +86,7 @@ builder.Services.AddCors(options =>
         b =>
         {
             b
-                .WithOrigins(configuration["frontend:URL"])
+                .WithOrigins(configuration[" http://localhost:5173/"])
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
@@ -104,7 +106,7 @@ app.UseCors("AllowReactDevClient");
 
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.MapHub<ChatHub>("/Hubs/ChatHub");
 app.MapControllers();
 
 app.Run();
