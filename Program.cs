@@ -82,18 +82,18 @@ builder.Services.AddSwaggerGen(c =>
 
 
 //cors
-builder.Services.AddCors(options =>
+/*builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactDevClient",
         b =>
         {
             b
-                .WithOrigins(configuration[" http://localhost:5173/"])
+                .WithOrigins(configuration[""])
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
 });
-
+*/
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
