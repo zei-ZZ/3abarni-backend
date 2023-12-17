@@ -14,7 +14,9 @@ var configuration = builder.Configuration;
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("db")));
 
 //Identity
-builder.Services.AddIdentity<User, IdentityRole>(options=> { options.User.RequireUniqueEmail = true; })
+builder.Services.AddIdentity<User, IdentityRole>(options=> { options.User.RequireUniqueEmail = true;
+options.SignIn.RequireConfirmedEmail = true;
+})
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
@@ -40,6 +42,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
