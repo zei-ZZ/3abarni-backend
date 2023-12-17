@@ -72,13 +72,11 @@ namespace _3abarni_backend.Services
 
                         var uriBuilder= new UriBuilder("https://localhost:7225/api/Auth/confirmemail");
                         var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-                        query["token"]=token;
                         query["userid"] = user.Id;
+                        query["token"]=token;
                         uriBuilder.Query = query.ToString();
                         var urlString = uriBuilder.ToString();
-                        var emailBody = $"please verify your email address <a href=\"{urlString}\"> Click here </a> ";
-                        await _emailSender.SendEmailAsync( user.Email, "confirm your email address", urlString);
-                        
+                        var emailBody = $"please verify your email address <a href=\"{urlString}\"> Click here </a> ";               
                         await _userManager.UpdateAsync(user);
                         await _emailSender.SendEmailAsync( user.Email, "email account confirmation", emailBody);
                  
@@ -94,14 +92,15 @@ namespace _3abarni_backend.Services
         
         public async Task<string> Login(LoginRequestDto request)
         {
-         
+            
             var user = await _userManager.FindByEmailAsync(request.Email);
-
+            
             if (user is null || !await _userManager.CheckPasswordAsync(user, request.Password))
             {
                 throw new ArgumentException($"Unable to authenticate user {request.Email}");
             }
-
+            if (!user.EmailConfirmed)
+                throw new Exception("email address not verified, please check your inbox");
             var authClaims = new List<Claim>
         {
             new(ClaimTypes.Name, user.UserName),
