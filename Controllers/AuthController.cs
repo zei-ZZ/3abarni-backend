@@ -34,5 +34,13 @@ namespace _3abarni_backend.Controllers
 
             return Ok(response);
         }
+        [Route ("confirmemail")]
+        [HttpGet]
+        public async Task <IActionResult> ConfirmEmail(string userId, string token)
+        {
+           
+            var response =await _authenticationService.ConfirmEmail(userId,token) ;
+            return Ok();
+        }
     }
 }

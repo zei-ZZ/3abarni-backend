@@ -9,6 +9,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Transactions;
 using System.Web;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace _3abarni_backend.Services
 {
@@ -33,63 +34,61 @@ namespace _3abarni_backend.Services
             {
                 throw new ArgumentException("password and password confirmation don't match");
             }
-            // using var transaction = new TransactionScope();
-             using (var tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-              {
+           /*  using (var tx = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+              { */
                     try
                     {
-                    var userByEmail = await _userManager.FindByEmailAsync(request.Email);
-                    if (userByEmail is not null)
-                    {
-                        throw new ArgumentException($"User with email {request.Email} exists.");
-                    }
+                        var userByEmail = await _userManager.FindByEmailAsync(request.Email);
+                        if (userByEmail is not null)
+                        {
+                            throw new ArgumentException($"User with email {request.Email} exists.");
+                        }
 
-                    User user = new()
-                    {
-                        Email = request.Email,
-                        UserName = request.Username,
+                        User user = new()
+                        {
+                            Email = request.Email,
+                            UserName = request.Username,
 
-                        SecurityStamp = Guid.NewGuid().ToString()
-                    };
-                    var result = await _userManager.CreateAsync(user, request.Password);
+                            SecurityStamp = Guid.NewGuid().ToString()
+                        };
+                        var result = await _userManager.CreateAsync(user, request.Password);
 
-                    if (!result.Succeeded)
-                    {
-                        throw new ArgumentException($"Unable to register user {request.Username} errors: {GetErrorsText(result.Errors)}");
-                    }
-                    if (request.ProfilePic is not null)
-                    {
-                        user.ProfilePicPath = await _fileUploadService.UploadFile(_configuration.GetSection("FileUpload:ProfilePictures").Value, request.ProfilePic);
-                    }
-                    else
-                    {
-                        user.ProfilePicPath = Path.Combine(_configuration.GetSection("FileUpload:ProfilePictures").Value, "default.jpg");
-                    }
-                    var userFromDb = await _userManager.FindByNameAsync(user.UserName);
-                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        if (!result.Succeeded)
+                        {
+                            throw new ArgumentException($"Unable to register user {request.Username} errors: {GetErrorsText(result.Errors)}");
+                        }
+                        if (request.ProfilePic is not null)
+                        {
+                            user.ProfilePicPath = await _fileUploadService.UploadFile(_configuration.GetSection("FileUpload:ProfilePictures").Value, request.ProfilePic);
+                        }
+                        else
+                        {
+                            user.ProfilePicPath = Path.Combine(_configuration.GetSection("FileUpload:ProfilePictures").Value, "default.jpg");
+                        }
                     
-                    var emailBody = "please verify your email address <a href=\" #URL \"> Click here </a> ";
+                        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    
 
 
-                    /*var uriBuilder= new UriBuilder("https://localhost:7225/confirmemail");
-                    var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-                    query["token"]=token;
-                    query["userid"] = userFromDb.Id;
-                    uriBuilder.Query = query.ToString();
-                    var urlString = uriBuilder.ToString();
-                    var senderEmail = _configuration["Email:SenderEmail"];
-                    await _emailSender.SendEmailAsync(senderEmail, userFromDb.Email, "confirm your email address", urlString);
-                    */
-                    await _emailSender.SendEmailAsync( "zeinebba12@gmail.com", "hi", "hi");
+                        var uriBuilder= new UriBuilder("https://localhost:7225/api/Auth/confirmemail");
+                        var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+                        query["token"]=token;
+                        query["userid"] = user.Id;
+                        uriBuilder.Query = query.ToString();
+                        var urlString = uriBuilder.ToString();
+                        var emailBody = $"please verify your email address <a href=\"{urlString}\"> Click here </a> ";
+                        await _emailSender.SendEmailAsync( user.Email, "confirm your email address", urlString);
+                        
+                        await _userManager.UpdateAsync(user);
+                        await _emailSender.SendEmailAsync( user.Email, "email account confirmation", emailBody);
                  
-                    await _userManager.UpdateAsync(user);
-                    return await Login(new LoginRequestDto { Email = request.Email, Password = request.Password });
-                }
-            catch (Exception ex)
-            {
-                throw new Exception("Registration failed", ex);
-            }
-            }
+                        return await Login(new LoginRequestDto { Email = request.Email, Password = request.Password });
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("Registration failed", ex);
+                    }
+           // }
 
         }
         
@@ -115,6 +114,24 @@ namespace _3abarni_backend.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        public async Task<string> ConfirmEmail( string userId,string token)
+        {
+            if (userId == null || token == null)
+            {
+                throw new Exception("invalid confiramtion url");
+            }
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                throw new Exception("invalid email params");
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded)
+            {
+                throw new Exception("confirmation failed");
+
+            }
+            return "ok";
+        }
+      
         private JwtSecurityToken GetToken(IEnumerable<Claim> authClaims)
         {
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));

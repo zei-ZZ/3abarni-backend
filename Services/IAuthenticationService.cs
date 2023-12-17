@@ -9,5 +9,6 @@ namespace _3abarni_backend.Services
     {
         Task<string> Register([FromForm] RegisterRequestDto request);
         Task<string> Login([FromForm] LoginRequestDto request);
+        Task<string> ConfirmEmail(string userId, string token);
     }
 }
