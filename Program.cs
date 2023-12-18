@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using _3abarni_backend.Services;
+using _3abarni_backend.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -14,7 +15,10 @@ var configuration = builder.Configuration;
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("db")));
 
 //Identity
-builder.Services.AddIdentity<User, IdentityRole>(options=> { options.User.RequireUniqueEmail = true; })
+builder.Services.AddIdentity<User, IdentityRole>(options=> { 
+    options.User.RequireUniqueEmail = true;
+options.SignIn.RequireConfirmedEmail = true;
+})
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
@@ -40,6 +44,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
@@ -100,7 +105,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseHttpsRedirection();
 app.UseCors("AllowReactDevClient");
 

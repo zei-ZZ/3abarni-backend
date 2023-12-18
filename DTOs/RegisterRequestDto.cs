@@ -11,6 +11,8 @@ namespace _3abarni_backend.DTOs
         [Required]
         public string? Password { get; set; }
         [Required]
+        public string? PasswordConfirmation { get; set; }
+ 
         public IFormFile? ProfilePic { get; set; }
 
 
