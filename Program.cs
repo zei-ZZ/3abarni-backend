@@ -11,6 +11,19 @@ using _3abarni_backend.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
+//CORS configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactDevClient",
+                      policy =>
+                      {
+                          policy.WithOrigins(configuration["JWT:ValidAudience"].TrimEnd('/'))
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                      });
+});
+
 //DbContext
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("db")));
 
@@ -81,20 +94,9 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 
-//cors
-/*builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowReactDevClient",
-        b =>
-        {
-            b
-                .WithOrigins(configuration[""])
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        });
-});
-*/
 var app = builder.Build();
+app.UseHttpsRedirection();
+app.UseRouting();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -103,7 +105,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+
 app.UseCors("AllowReactDevClient");
 
 app.UseAuthentication();
