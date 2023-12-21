@@ -1,12 +1,17 @@
-﻿namespace _3abarni_backend.Models
-{
-    public class Chat
-{
-    public Guid ChatId { get; set; }
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
-    // Navigation Properties
-    public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
-    public ICollection<Message> Messages { get; set; } = new List<Message>();
-}
+namespace _3abarni_backend.Models
+{
+        public class Chat
+        {
+            [Key]
+            [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+            public int Id { get; set; }
+            public string Name { get; set; }
+
+            // Navigation property
+            public ICollection<Message> Messages { get; set; }
+        }
 
 }

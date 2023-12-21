@@ -7,12 +7,27 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using _3abarni_backend.Services;
 using _3abarni_backend.Middlewares;
+using _3abarni_backend.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
 //DbContext
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("db")));
+
+//Repositories
+builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<ChatRepository>();
+builder.Services.AddScoped<MessageRepository>();
+builder.Services.AddScoped<NotificationRepository>();
+builder.Services.AddScoped<ReactionRepository>();
+
+//Services
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ChatService>();
+builder.Services.AddScoped<MessageService>();
+builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<ReactionService>();
 
 //Identity
 builder.Services.AddIdentity<User, IdentityRole>(options=> { 
@@ -107,6 +122,8 @@ if (app.Environment.IsDevelopment())
 }
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseHttpsRedirection();
+app.UseRouting();
+
 app.UseCors("AllowReactDevClient");
 
 app.UseAuthentication();

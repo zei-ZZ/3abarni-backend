@@ -1,17 +1,22 @@
-﻿namespace _3abarni_backend.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+
+namespace _3abarni_backend.Models
 {
     public class Message
     {
-        public Guid MessageId { get; set; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
         public string Content { get; set; }
         public DateTime Timestamp { get; set; }
 
-        // Foreign Key
-        public Guid ChatId { get; set; }
+        // Foreign key and navigation property to Chat
+        public int ChatId { get; set; }
         public Chat Chat { get; set; }
 
-        // Navigation Property
-        public ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();
+        // Navigation property to reactions
+        public ICollection<Reaction> Reactions { get; set; }
     }
 
 
