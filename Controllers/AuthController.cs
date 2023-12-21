@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace _3abarni_backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class AuthController : Controller
     {

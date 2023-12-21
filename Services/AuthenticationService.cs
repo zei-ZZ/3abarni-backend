@@ -70,7 +70,7 @@ namespace _3abarni_backend.Services
                     
 
 
-                        var uriBuilder= new UriBuilder("https://localhost:7225/api/Auth/confirmemail");
+                        var uriBuilder= new UriBuilder("https://localhost:7225/Auth/confirmemail");
                         var query = HttpUtility.ParseQueryString(uriBuilder.Query);
                         query["userid"] = user.Id;
                         query["token"]=token;
