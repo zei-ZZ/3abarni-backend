@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace _3abarni_backend.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class AuthController : Controller
     {
@@ -33,6 +33,14 @@ namespace _3abarni_backend.Controllers
             var response = await _authenticationService.Register(request);
 
             return Ok(response);
+        }
+        [Route ("confirmemail")]
+        [HttpGet]
+        public async Task <IActionResult> ConfirmEmail(string userId, string token)
+        {
+           
+            var response =await _authenticationService.ConfirmEmail(userId,token) ;
+            return Ok();
         }
     }
 }

@@ -7,6 +7,9 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using _3abarni_backend.Services;
 using _3abarni_backend.Hubs;
+using _3abarni_backend.Middlewares;
+using _3abarni_backend.Repositories;
+
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -27,8 +30,25 @@ builder.Services.AddCors(options =>
 //DbContext
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("db")));
 
+//Repositories
+builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<ChatRepository>();
+builder.Services.AddScoped<MessageRepository>();
+builder.Services.AddScoped<NotificationRepository>();
+builder.Services.AddScoped<ReactionRepository>();
+
+//Services
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ChatService>();
+builder.Services.AddScoped<MessageService>();
+builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<ReactionService>();
+
 //Identity
-builder.Services.AddIdentity<User, IdentityRole>(options=> { options.User.RequireUniqueEmail = true; })
+builder.Services.AddIdentity<User, IdentityRole>(options=> { 
+    options.User.RequireUniqueEmail = true;
+options.SignIn.RequireConfirmedEmail = true;
+})
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
@@ -54,6 +74,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
@@ -63,7 +84,7 @@ builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Wedding Planner API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Chat App API", Version = "v1" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
@@ -104,6 +125,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionHandlerMiddleware>();
+app.UseHttpsRedirection();
+app.UseRouting();
 
 
 app.UseCors("AllowReactDevClient");
