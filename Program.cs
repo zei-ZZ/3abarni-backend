@@ -2,15 +2,30 @@ using _3abarni_backend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens; 
 using System.Text;
 using Microsoft.OpenApi.Models;
 using _3abarni_backend.Services;
+using _3abarni_backend.Hubs;
 using _3abarni_backend.Middlewares;
 using _3abarni_backend.Repositories;
 
+
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
+
+//CORS configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactDevClient",
+                      policy =>
+                      {
+                          policy.WithOrigins(configuration["JWT:ValidAudience"].TrimEnd('/'))
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                      });
+});
 
 //DbContext
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("db")));
@@ -65,6 +80,7 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -99,20 +115,9 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 
-//cors
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowReactDevClient",
-        b =>
-        {
-            b
-                .WithOrigins(configuration["frontend:URL"])
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        });
-});
-
 var app = builder.Build();
+app.UseHttpsRedirection();
+app.UseRouting();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -120,15 +125,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseHttpsRedirection();
 app.UseRouting();
+
 
 app.UseCors("AllowReactDevClient");
 
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.MapHub<ChatHub>("/Hubs/ChatHub");
 app.MapControllers();
 
 app.Run();
