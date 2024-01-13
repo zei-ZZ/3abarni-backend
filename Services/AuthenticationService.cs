@@ -79,8 +79,8 @@ namespace _3abarni_backend.Services
                         var emailBody = $"please verify your email address <a href=\"{urlString}\"> Click here </a> ";               
                         await _userManager.UpdateAsync(user);
                         await _emailSender.SendEmailAsync( user.Email, "email account confirmation", emailBody);
-                 
-                        return await Login(new LoginRequestDto { Email = request.Email, Password = request.Password });
+
+                return "User registered successfully"; 
                     }
                     catch (Exception ex)
                     {
