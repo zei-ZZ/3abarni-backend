@@ -84,7 +84,7 @@ namespace _3abarni_backend.Services
                     }
                     catch (Exception ex)
                     {
-                        throw new Exception("Registration failed", ex);
+                        throw new Exception("Registration failed: "+ ex.Message);
                     }
            // }
 
