@@ -105,8 +105,15 @@ namespace _3abarni_backend.Services
         {
             new(ClaimTypes.Name, user.UserName),
             new(ClaimTypes.Email, user.Email),
+            new(ClaimTypes.NameIdentifier, user.Id),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new("user_id", user.Id),
         };
+            foreach (var claim in authClaims)
+            {
+                Console.WriteLine($"{claim.Type}: {claim.Value}");
+            }
+
 
             var token = GetToken(authClaims);
 
