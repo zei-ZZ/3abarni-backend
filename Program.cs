@@ -9,6 +9,7 @@ using _3abarni_backend.Services;
 using _3abarni_backend.Hubs;
 using _3abarni_backend.Middlewares;
 using _3abarni_backend.Repositories;
+using Microsoft.Extensions.FileProviders;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,7 +44,15 @@ builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<MessageService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<ReactionService>();
-
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IFileRetrievalService, FileRetrievalService>(provider =>
+{
+    var env = provider.GetRequiredService<IWebHostEnvironment>();
+    var imagesDirectory = Path.Combine(env.ContentRootPath, "uploads");
+    return new FileRetrievalService(imagesDirectory);
+});
 //Identity
 builder.Services.AddIdentity<User, IdentityRole>(options=> { 
     options.User.RequireUniqueEmail = true;
@@ -73,10 +82,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddScoped<IFileUploadService, FileUploadService>();
-builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -117,6 +123,13 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 app.UseHttpsRedirection();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+           Path.Combine(builder.Environment.ContentRootPath, "uploads")),
+    RequestPath = "/uploads"
+});
 app.UseRouting();
 
 // Configure the HTTP request pipeline.
