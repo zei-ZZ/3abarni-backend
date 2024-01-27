@@ -47,12 +47,12 @@ builder.Services.AddScoped<ReactionService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-builder.Services.AddScoped<IFileRetrievalService, FileRetrievalService>(provider =>
+/* builder.Services.AddScoped<IFileRetrievalService, FileRetrievalService>(provider =>
 {
     var env = provider.GetRequiredService<IWebHostEnvironment>();
     var imagesDirectory = Path.Combine(env.ContentRootPath, "uploads");
     return new FileRetrievalService(imagesDirectory);
-});
+});*/
 //Identity
 builder.Services.AddIdentity<User, IdentityRole>(options=> { 
     options.User.RequireUniqueEmail = true;

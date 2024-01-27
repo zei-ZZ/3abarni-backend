@@ -14,7 +14,8 @@
             if (file == null || file.Length==0) {
                 throw new ArgumentException("File is nul or empty");
             }
-            var fileName=Guid.NewGuid().ToString()+'_'+file.FileName;
+            var fileName=Guid.NewGuid().ToString()+ Path.GetExtension(file.FileName);
+
 
             var filePath= Path.Combine(uploadDir, fileName);
 
@@ -23,7 +24,7 @@
                 await file.CopyToAsync(stream);
 
             }
-            return fileName;
+            return Path.Combine (uploadDir,fileName);
             }
             catch (Exception ex)
             {
