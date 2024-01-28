@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using _3abarni_backend.DTOs;
+using _3abarni_backend.Services;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -10,6 +12,14 @@ namespace _3abarni_backend.Hubs
     {
         // Maintain a list of connected users
         private static readonly Dictionary<string, string> UserConnections = new Dictionary<string, string>();
+
+        private readonly ChatService _chatService;
+        private readonly MessageService _messageService;
+        public ChatHub(ChatService chatService, MessageService messageService)
+        {
+            _chatService = chatService;
+            _messageService = messageService;
+        }
 
         // Method to get the connection ID for a user by username
         public string GetConnectionIdByUsername(string username)
@@ -38,8 +48,20 @@ namespace _3abarni_backend.Hubs
         }
 
         // Method to send a message to a specific user
-        public async Task SendMessageToUser(string receiverUsername, string message)
+        public async Task SendMessageToUser(string receiverUsername, string senderUsername, string message)
         {
+            // Get or create a chat between the sender and receiver
+            var chatDto = _chatService.GetOrCreateChat(new List<string> { senderUsername, receiverUsername });
+
+            // Persist the message
+            var messageDto = new MessageDto
+            {
+                Content = message,
+                Timestamp = DateTime.UtcNow,
+                ChatId = chatDto.Id
+            };
+
+            _messageService.Create(messageDto);
 
             if (UserConnections.TryGetValue(receiverUsername, out var receiverConnectionId))
             {

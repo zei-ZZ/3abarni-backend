@@ -12,6 +12,7 @@ namespace _3abarni_backend.Models
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Reaction> Reactions { get; set; }
 
+
         // We may not need to add DbSet<User> for the User entity since it is managed by IdentityDbContext<User>
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -24,6 +24,17 @@ namespace _3abarni_backend.Repositories
             return _dbContext.Chats.FirstOrDefault(chat => chat.Id == id);
         }
 
+        public Chat GetChatByUsers(IEnumerable<string> UserIds)
+        {
+            var chat = _dbContext.Chats
+                .Where(c => c.Users.All(user => UserIds.Contains(user.Id)))
+                .FirstOrDefault();
+
+            return chat;
+        }
+
+
+
         public void Create(Chat chat)
         {
             _dbContext.Chats.Add(chat);
