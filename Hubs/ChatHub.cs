@@ -9,88 +9,48 @@ namespace _3abarni_backend.Hubs
     public class ChatHub : Hub
     {
         // Maintain a list of connected users
-        private static readonly Dictionary<string, string> ConnectedUsers = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> UserConnections = new Dictionary<string, string>();
 
-        public async Task SendMessage(string sender, string receiver, string message)
+        // Method to get the connection ID for a user by username
+        public string GetConnectionIdByUsername(string username)
         {
-            // You can perform any additional validation or authorization here
-
-            // Broadcast the message to the sender and receiver
-            await Clients.User(receiver).SendAsync("ReceiveMessage", sender, message);
-            await Clients.User(sender).SendAsync("ReceiveMessage", sender, message);
-
-            Console.WriteLine($"Message sent: {message} from {sender} to {receiver}");
+            if (UserConnections.TryGetValue(username, out var connectionId))
+            {
+                return connectionId;
+            }
+            return null;
         }
 
-        public override async Task OnConnectedAsync()
+        // Method to associate a username with a connection ID
+        public void AddUserConnection(string username)
         {
-            try
+            var connectionId = Context.ConnectionId;
+            Console.WriteLine($"Connection ID for user in connection {username}: {connectionId}");
+
+            if (UserConnections.ContainsKey(username))
             {
-                var claims = Context.User.Claims.Select(c => $"{c.Type}: {c.Value}");
-                Console.WriteLine($"Claims: {string.Join(", ", claims)}");
-
-                var userIdClaim = Context.User.FindFirst("user_id");
-
-                if (userIdClaim != null)
-                {
-                    var userId = userIdClaim.Value;
-
-                    ConnectedUsers[userId] = Context.ConnectionId;
-
-                    Console.WriteLine($"User connected with ID: {userId}");
-
-                    // Inform the client about the successful connection
-                    await Clients.Caller.SendAsync("ConnectionEstablished", "Connected to the chat.");
-
-                    // Notify others that a new user has joined (optional)
-                    await Clients.Others.SendAsync("UserJoined", userId);
-                }
-                else
-                {
-                    // Handle the case where the user_id claim is not available
-                    Console.WriteLine("User ID claim is null or empty.");
-                }
+                UserConnections[username] = connectionId;
             }
-            catch (Exception ex)
+            else
             {
-                // Handle exceptions if necessary
-                Console.WriteLine($"Error on connection: {ex.Message}");
+                UserConnections.Add(username, connectionId);
             }
-
-            await base.OnConnectedAsync();
         }
 
-
-
-        public override async Task OnDisconnectedAsync(Exception exception)
+        // Method to send a message to a specific user
+        public async Task SendMessageToUser(string receiverUsername, string message)
         {
-            try
+
+            if (UserConnections.TryGetValue(receiverUsername, out var receiverConnectionId))
             {
-                // Remove disconnected user from the list
-                var userIdClaim = Context.User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-
-                if (userIdClaim != null)
-                {
-                    var userId = userIdClaim.Value;
-
-                    ConnectedUsers.Remove(userId);
-
-                    // Notify others that a user has left (optional)
-                    await Clients.Others.SendAsync("UserLeft", userId);
-                }
-                else
-                {
-                    // Handle the case where the user_id claim is not available
-                    Console.WriteLine("User ID claim is null or empty.");
-                }
+                await Clients.Client(receiverConnectionId).SendAsync("ReceiveMessage", Context.ConnectionId, message);
+                Console.WriteLine($"Message sent: {message} from {Context.ConnectionId} to {receiverConnectionId}");
             }
-            catch (Exception ex)
+            else
             {
-                // Handle exceptions if necessary
-                Console.WriteLine($"Error on disconnection: {ex.Message}");
+                // Handle the case where the receiver's connection ID is not found
+                Console.WriteLine($"Error: Receiver with username {receiverUsername} not found.");
             }
-
-            await base.OnDisconnectedAsync(exception);
         }
 
     }
