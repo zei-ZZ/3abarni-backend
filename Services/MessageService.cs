@@ -33,7 +33,8 @@ namespace _3abarni_backend.Services
             {
                 Content = messageDto.Content,
                 Timestamp = messageDto.Timestamp,
-                ChatId = messageDto.ChatId
+                ChatId = messageDto.ChatId,
+                UserId = messageDto.UserId
             };
             _messageRepository.Create(message);
         }

@@ -9,10 +9,12 @@ namespace _3abarni_backend.Services
     public class ChatService
     {
         private readonly ChatRepository _chatRepository;
-
-        public ChatService(ChatRepository chatRepository)
+        private readonly UserRepository _userRepository;
+        public ChatService(ChatRepository chatRepository, UserRepository userRepository)
         {
             _chatRepository = chatRepository;
+            _userRepository = userRepository;
+
         }
 
         public IEnumerable<ChatDto> GetAll()
@@ -25,6 +27,51 @@ namespace _3abarni_backend.Services
         {
             var chat = _chatRepository.GetById(id);
             return chat != null ? ChatMapper.MapToDto(chat) : null;
+        }
+
+        public ChatDto GetOrCreateChat(List<string> UserIds)
+        {
+            var existingChat = _chatRepository.GetChatByUsers(UserIds);
+
+            if (existingChat != null)
+            {
+                return ChatMapper.MapToDto(existingChat);
+            }
+
+            var newChat = new Chat
+            {
+                Name = GenerateChatName(UserIds),
+                Users = new List<User>()
+            };
+
+            foreach (var userId in UserIds)
+            {
+                User user = _userRepository.GetById(userId);
+                if (user != null)
+                {
+                    newChat.Users.Add(user);
+                }
+                else
+                {
+                    // Handle the case where a user with the given ID is not found
+                    // You might want to log this or handle it according to your requirements
+                }
+            }
+
+            _chatRepository.Create(newChat);
+
+            // Use ChatMapper to convert the entire newChat object to a ChatDto
+            var chatDto = ChatMapper.MapToDto(newChat);
+            chatDto.UserIds = newChat.Users.Select(user => user.Id).ToList(); // Set the UserIds property
+
+            return chatDto;
+        }
+
+        private string GenerateChatName(List<string> UserIds)
+        {
+            // Implement your logic to generate a meaningful chat name based on the user IDs
+            // For example, concatenate user names or use a default name
+            return "Chat_" + string.Join("_", UserIds);
         }
 
         public void Create(ChatDto chatDto)
