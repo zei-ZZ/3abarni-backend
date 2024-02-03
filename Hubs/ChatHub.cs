@@ -58,7 +58,8 @@ namespace _3abarni_backend.Hubs
             {
                 Content = message,
                 Timestamp = DateTime.UtcNow,
-                ChatId = chatDto.Id
+                ChatId = chatDto.Id,
+                UserId = senderUsername
             };
 
             _messageService.Create(messageDto);

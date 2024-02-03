@@ -12,8 +12,10 @@ namespace _3abarni_backend.Models
         public DateTime Timestamp { get; set; }
 
         // Foreign key and navigation property to Chat
-        public int ChatId { get; set; }
-        public Chat Chat { get; set; }
+        public int ChatId { get; set;}
+        public Chat Chat { get; set;}
+        public User User { get; set; }
+        public string UserId { get; set; }
 
         // Navigation property to reactions
         public ICollection<Reaction> Reactions { get; set; }
