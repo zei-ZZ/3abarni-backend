@@ -2,11 +2,13 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using _3abarni_backend.Models;
+using _3abarni_backend.DTOs;
 
 namespace _3abarni_backend.Repositories
 {
     public class ChatRepository
     {
+        const int NUMBER_OF_ITEMS_PER_PAGE = 6;
         private readonly AppDbContext _dbContext;
 
         public ChatRepository(AppDbContext dbContext)
@@ -32,7 +34,17 @@ namespace _3abarni_backend.Repositories
 
             return chat;
         }
+        public IEnumerable<Chat> getContactsByUserPaginated(string id , int page)
+        {
+            var chats= _dbContext.Chats
+                 .Where(c => c.Users.All(user => user.Id ==id))
+                 .OrderBy(c=>c.Messages.)
+                 .Skip((page - 1) * NUMBER_OF_ITEMS_PER_PAGE)
+                 .Take(NUMBER_OF_ITEMS_PER_PAGE)
+                 .ToList();
+            return chats;
 
+        }
 
 
         public void Create(Chat chat)

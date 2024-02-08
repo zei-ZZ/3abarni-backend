@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using _3abarni_backend.Models;
+using Microsoft.IdentityModel.Tokens;
 
 namespace _3abarni_backend.Repositories
 {
     public class UserRepository
     {
+        const int NUMBER_OF_ITEMS_PER_PAGE= 6;
         private readonly AppDbContext _dbContext;
 
         public UserRepository(AppDbContext dbContext)
@@ -46,5 +48,16 @@ namespace _3abarni_backend.Repositories
                 _dbContext.SaveChanges();
             }
         }
+        public IEnumerable<User> SearchPaginated(string query,int page)
+        {
+            if(query.IsNullOrEmpty())
+                  return Enumerable.Empty<User>();
+            var users = _dbContext.Users.Where(user => user.NormalizedUserName.Contains(query.Trim().ToUpper()))
+                .Skip((page-1)* NUMBER_OF_ITEMS_PER_PAGE)
+                .Take(NUMBER_OF_ITEMS_PER_PAGE)
+                .ToList();
+            return users;
+        }
+
     }
 }
