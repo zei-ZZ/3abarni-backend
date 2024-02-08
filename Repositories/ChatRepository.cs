@@ -36,12 +36,13 @@ namespace _3abarni_backend.Repositories
         }
         public IEnumerable<Chat> getContactsByUserPaginated(string id , int page)
         {
-            var chats= _dbContext.Chats
-                 .Where(c => c.Users.All(user => user.Id ==id))
-                 .OrderBy(c=>c.Messages.)
-                 .Skip((page - 1) * NUMBER_OF_ITEMS_PER_PAGE)
-                 .Take(NUMBER_OF_ITEMS_PER_PAGE)
-                 .ToList();
+            var chats = _dbContext.Chats
+                .Where(c => c.Users.Any(user => user.Id == id))
+                .OrderByDescending(c => c.Messages.Max(m => m.Timestamp))
+                .Skip((page - 1) * NUMBER_OF_ITEMS_PER_PAGE)
+                .Take(NUMBER_OF_ITEMS_PER_PAGE)
+                .ToList();
+
             return chats;
 
         }
