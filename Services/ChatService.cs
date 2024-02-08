@@ -23,10 +23,26 @@ namespace _3abarni_backend.Services
             return chats.Select(ChatMapper.MapToDto);
         }
 
+        public Chat GetChatByUsers(string senderUsername, string receiverUsername)
+        {
+            ICollection<string> userIds = new List<string> { senderUsername, receiverUsername };
+            var chat = _chatRepository.GetChatByUsers(userIds);
+            return chat;
+        }
+
         public ChatDto GetById(int id)
         {
             var chat = _chatRepository.GetById(id);
             return chat != null ? ChatMapper.MapToDto(chat) : null;
+        }
+
+        public IEnumerable<MessageDto> GetChatHistory(string senderUsername, string receiverUsername)
+        {
+            // Retrieve messages between sender and receiver
+            var messages = _chatRepository.GetChatHistory(senderUsername, receiverUsername);
+
+            // Map messages to DTOs
+            return messages.Select(MessageMapper.MapToDto);
         }
 
         public ChatDto GetOrCreateChat(List<string> UserIds)

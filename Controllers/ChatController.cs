@@ -16,6 +16,21 @@ namespace _3abarni_backend.Controllers
             _chatService = chatService;
         }
 
+        /*[HttpGet("/sender/{senderUsername}/receiver/{receiverUsername}")]
+        public IActionResult GetChatByUsers(string senderUsername, string receiverUsername)
+        {
+            var chats = _chatService.GetChatByUsers(senderUsername, receiverUsername);
+            return Ok(chats);
+        }*/
+
+        [HttpGet("/sender/{senderUsername}/receiver/{receiverUsername}")]
+        public IActionResult GetChatHistory(string senderUsername, string receiverUsername)
+        {
+            var chats = _chatService.GetChatHistory(senderUsername, receiverUsername);
+            return Ok(chats);
+        }
+
+
         [HttpGet]
         public IActionResult GetAllChats()
         {

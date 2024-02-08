@@ -24,13 +24,27 @@ namespace _3abarni_backend.Repositories
             return _dbContext.Chats.FirstOrDefault(chat => chat.Id == id);
         }
 
-        public Chat GetChatByUsers(IEnumerable<string> UserIds)
+        public Chat GetChatByUsers(ICollection<string> UserIds)
         {
             var chat = _dbContext.Chats
+                .Include(chat => chat.Users)
+                .Include(chat => chat.Messages)
                 .Where(c => c.Users.All(user => UserIds.Contains(user.Id)))
                 .FirstOrDefault();
 
             return chat;
+        }
+
+        public IEnumerable<Message> GetChatHistory(string senderUsername, string receiverUsername)
+        {
+            ICollection<string> userIds = new List<string> { senderUsername, receiverUsername };
+            Chat chat = GetChatByUsers(userIds);
+
+            var messages = chat.Messages
+                .OrderBy(m => m.Timestamp)
+                .ToList();
+
+            return messages;
         }
 
 
