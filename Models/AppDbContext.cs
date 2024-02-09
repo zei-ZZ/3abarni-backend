@@ -49,9 +49,6 @@ namespace _3abarni_backend.Models
                 .Navigation(e => e.Messages)
                 .AutoInclude();
 
-
-
-            // Add other configuration for relationships if needed
         }
     }
 

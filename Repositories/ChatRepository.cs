@@ -26,7 +26,7 @@ namespace _3abarni_backend.Repositories
             return _dbContext.Chats.FirstOrDefault(chat => chat.Id == id);
         }
 
-        public Chat GetChatByUsers(IEnumerable<string> UserIds)
+        public Chat GetChatByUsers(ICollection<string> UserIds)
         {
             var chat = _dbContext.Chats
                 .Where(c => c.Users.All(user => UserIds.Contains(user.Id)))
@@ -34,7 +34,7 @@ namespace _3abarni_backend.Repositories
 
             return chat;
         }
-        public IEnumerable<Chat> getContactsByUserPaginated(string id , int page)
+        public IEnumerable<Chat> getContactsByUserPaginated(string id, int page)
         {
             var chats = _dbContext.Chats
             //    .Include(chat=> chat.Users)
@@ -46,8 +46,23 @@ namespace _3abarni_backend.Repositories
                 .ToList();
 
             return chats;
-
         }
+        public IEnumerable<Message> GetChatHistory(string senderUsername, string receiverUsername)
+        {
+            ICollection<string> userIds = new List<string> { senderUsername, receiverUsername };
+            Chat chat = GetChatByUsers(userIds);
+            try { 
+            var messages = chat?.Messages
+                .OrderBy(m => m.Timestamp)
+                .ToList();
+
+            return messages;
+            }catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
 
 
         public void Create(Chat chat)
