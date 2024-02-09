@@ -56,5 +56,12 @@ namespace _3abarni_backend.Services
         {
             _userRepository.Delete(id);
         }
+
+        public IEnumerable<UserDto> SearchPaginated(string query, int page)
+        {
+            var users= _userRepository.SearchPaginated(query, page);
+            return users != null ? users.Select(UserMapper.MapToDto) : new List<UserDto>();
+        }
+
     }
 }

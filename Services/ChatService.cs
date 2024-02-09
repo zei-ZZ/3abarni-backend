@@ -3,6 +3,7 @@ using _3abarni_backend.DTOs;
 using _3abarni_backend.Mappers;
 using _3abarni_backend.Models;
 using _3abarni_backend.Repositories;
+using Microsoft.IdentityModel.Tokens;
 
 namespace _3abarni_backend.Services
 {
@@ -17,6 +18,31 @@ namespace _3abarni_backend.Services
 
         }
 
+        public IEnumerable<ContactDto> GetContactsByUserPaginated(string id,int page) { 
+            var chats=_chatRepository.getContactsByUserPaginated(id,page);
+            if(chats.IsNullOrEmpty())
+                return new List<ContactDto>();
+            var list = new List<ContactDto>();
+
+            foreach (var chat in chats)
+            {
+                Console.WriteLine(chat.Users);
+
+                var receiver = chat.Users.Where(user=> user.Id != id).ToList()[0];
+                Message lastMessage = chat.Messages.Last();
+                var contactDto = new ContactDto
+                {
+                    id = receiver.Id,
+                    userName = receiver.UserName,
+                    profilePicPath=receiver.ProfilePicPath,
+                    lastMessageSent=lastMessage.Content,
+                    lastMessageSentAt=lastMessage.Timestamp
+                };
+                list.Add(contactDto);
+            }
+
+            return list;
+        }
         public IEnumerable<ChatDto> GetAll()
         {
             var chats = _chatRepository.GetAll();

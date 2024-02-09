@@ -21,6 +21,20 @@ namespace _3abarni_backend.Controllers
             var users = _userService.GetAll();
             return Ok(users);
         }
+        [HttpGet("search/{query}/{page}")]
+        public IActionResult GetUsersQueryPaginated( string query, int page)
+        {
+            try
+            {
+                var users = _userService.SearchPaginated(query, page);
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
+        }
 
         [HttpGet("{id}")]
         public IActionResult GetUserById(string id)
