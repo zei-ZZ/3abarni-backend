@@ -23,9 +23,12 @@ namespace _3abarni_backend.Services
             if(chats.IsNullOrEmpty())
                 return new List<ContactDto>();
             var list = new List<ContactDto>();
+
             foreach (var chat in chats)
             {
-                User receiver = chat.Users.Where(user=> user.Id !=id).First();
+                Console.WriteLine(chat.Users);
+
+                var receiver = chat.Users.Where(user=> user.Id != id).ToList()[0];
                 Message lastMessage = chat.Messages.Last();
                 var contactDto = new ContactDto
                 {

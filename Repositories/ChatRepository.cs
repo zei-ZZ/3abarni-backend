@@ -37,6 +37,8 @@ namespace _3abarni_backend.Repositories
         public IEnumerable<Chat> getContactsByUserPaginated(string id , int page)
         {
             var chats = _dbContext.Chats
+            //    .Include(chat=> chat.Users)
+            //    .Include(chat=> chat.Messages)
                 .Where(c => c.Users.Any(user => user.Id == id))
                 .OrderByDescending(c => c.Messages.Max(m => m.Timestamp))
                 .Skip((page - 1) * NUMBER_OF_ITEMS_PER_PAGE)
