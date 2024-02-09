@@ -83,6 +83,7 @@ namespace _3abarni_backend.Hubs
             var chatHistory = _chatService.GetChatHistory(senderUsername, receiverUsername);
 
             try{
+                Console.WriteLine("Chat is not empty", chatHistory);
                 return chatHistory;
             }catch(Exception ex){
                 Console.WriteLine("Chat is empty",ex);

@@ -27,8 +27,6 @@ namespace _3abarni_backend.Repositories
         public Chat GetChatByUsers(ICollection<string> UserIds)
         {
             var chat = _dbContext.Chats
-                .Include(chat => chat.Users)
-                .Include(chat => chat.Messages)
                 .Where(c => c.Users.All(user => UserIds.Contains(user.Id)))
                 .FirstOrDefault();
 
@@ -39,12 +37,16 @@ namespace _3abarni_backend.Repositories
         {
             ICollection<string> userIds = new List<string> { senderUsername, receiverUsername };
             Chat chat = GetChatByUsers(userIds);
-
-            var messages = chat.Messages
+            try { 
+            var messages = chat?.Messages
                 .OrderBy(m => m.Timestamp)
                 .ToList();
 
             return messages;
+            }catch (Exception ex)
+            {
+                return null;
+            }
         }
 
 

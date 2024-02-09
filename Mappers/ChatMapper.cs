@@ -7,10 +7,14 @@ namespace _3abarni_backend.Mappers
     {
         public static ChatDto MapToDto(Chat chat)
         {
+            // Extract user IDs from the Users collection
+            var userIds = chat.Users.Select(u => u.Id).ToList();
+
             return new ChatDto
             {
                 Id = chat.Id,
-                Name = chat.Name
+                Name = chat.Name,
+                UserIds = userIds
             };
         }
     }
