@@ -69,5 +69,11 @@ namespace _3abarni_backend.Controllers
             _chatService.Delete(id);
             return NoContent();
         }
+        [HttpGet("/contacts/{id}/{page}")]
+        public IActionResult GetContactsByUserPaginated(string id, int page)
+        {
+            var contacts =_chatService.GetContactsByUserPaginated(id,page);
+            return Ok(contacts);
+        }
     }
 }
