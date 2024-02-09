@@ -20,6 +20,13 @@ namespace _3abarni_backend.Hubs
             _chatService = chatService;
             _messageService = messageService;
         }
+        // method to retrieve the connected users 
+        public IEnumerable<string> GetConnectedUserIds()
+        {
+            return UserConnections.Keys;
+        }
+
+
 
         // Method to get the connection ID for a user by username
         public string GetConnectionIdByUsername(string username)
@@ -44,6 +51,8 @@ namespace _3abarni_backend.Hubs
             else
             {
                 UserConnections.Add(username, connectionId);
+                Clients.AllExcept(connectionId).SendAsync("UserConnected", username);
+
             }
         }
 
@@ -75,6 +84,7 @@ namespace _3abarni_backend.Hubs
                 Console.WriteLine($"Error: Receiver with username {receiverUsername} not found.");
             }
         }
+
 
     }
 }
