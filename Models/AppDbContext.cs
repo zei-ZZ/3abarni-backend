@@ -49,18 +49,6 @@ namespace _3abarni_backend.Models
                 .Navigation(e => e.Messages)
                 .AutoInclude();
 
-
-
-            // Add other configuration for relationships if needed
-            modelBuilder.Entity<Chat>()
-                .HasMany(e => e.Users)
-                .WithMany(e => e.Chats);
-            modelBuilder.Entity<Chat>()
-                .Navigation(e => e.Users)
-                .AutoInclude();
-            modelBuilder.Entity<Chat>()
-                .Navigation(e => e.Messages)
-                .AutoInclude();
         }
     }
 

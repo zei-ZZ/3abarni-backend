@@ -34,7 +34,7 @@ namespace _3abarni_backend.Repositories
 
             return chat;
         }
-        public IEnumerable<Chat> getContactsByUserPaginated(string id , int page)
+        public IEnumerable<Chat> getContactsByUserPaginated(string id, int page)
         {
             var chats = _dbContext.Chats
             //    .Include(chat=> chat.Users)
@@ -46,7 +46,7 @@ namespace _3abarni_backend.Repositories
                 .ToList();
 
             return chats;
-
+        }
         public IEnumerable<Message> GetChatHistory(string senderUsername, string receiverUsername)
         {
             ICollection<string> userIds = new List<string> { senderUsername, receiverUsername };
