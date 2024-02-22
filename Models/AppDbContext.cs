@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace _3abarni_backend.Models
 {
@@ -38,7 +39,16 @@ namespace _3abarni_backend.Models
                 .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Add other configuration for relationships if needed
+            modelBuilder.Entity<Chat>()
+            .HasMany(e => e.Users)
+            .WithMany(e => e.Chats) ;
+            modelBuilder.Entity<Chat>()
+                .Navigation(e => e.Users)
+                .AutoInclude();
+            modelBuilder.Entity<Chat>()
+                .Navigation(e => e.Messages)
+                .AutoInclude();
+
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using _3abarni_backend.DTOs;
+using _3abarni_backend.Models;
 using _3abarni_backend.Services;
 using Microsoft.AspNetCore.SignalR;
 using System;
@@ -82,6 +83,20 @@ namespace _3abarni_backend.Hubs
             {
                 // Handle the case where the receiver's connection ID is not found
                 Console.WriteLine($"Error: Receiver with username {receiverUsername} not found.");
+            }
+        }
+
+        public IEnumerable<MessageDto> GetChatHistory(string senderUsername, string receiverUsername)
+        {
+            // Get chat history between sender and receiver
+            var chatHistory = _chatService.GetChatHistory(senderUsername, receiverUsername);
+
+            try{
+                Console.WriteLine("Chat is not empty", chatHistory);
+                return chatHistory;
+            }catch(Exception ex){
+                Console.WriteLine("Chat is empty",ex);
+                return null;
             }
         }
 

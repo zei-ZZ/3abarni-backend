@@ -3,6 +3,7 @@ using _3abarni_backend.DTOs;
 using _3abarni_backend.Mappers;
 using _3abarni_backend.Models;
 using _3abarni_backend.Repositories;
+using System.Linq;
 
 namespace _3abarni_backend.Services
 {
@@ -26,6 +27,7 @@ namespace _3abarni_backend.Services
             var message = _messageRepository.GetById(id);
             return message != null ? MessageMapper.MapToDto(message) : null;
         }
+
 
         public void Create(MessageDto messageDto)
         {

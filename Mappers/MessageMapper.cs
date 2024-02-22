@@ -12,7 +12,8 @@ namespace _3abarni_backend.Mappers
                 Id = message.Id,
                 Content = message.Content,
                 Timestamp = message.Timestamp,
-                ChatId = message.ChatId
+                ChatId = message.ChatId,
+                UserId = message.UserId
             };
         }
     }
